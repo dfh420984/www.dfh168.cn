@@ -18,10 +18,14 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/pace.min.js"></script>
     <script src="js/modernizr.custom.js"></script>
+
+    <!-- vue -->
+    <script src="vendors/vue/vue.js"></script>
+    <script src="vendors/vue/vue-resource.js"></script>
 </head>
 
 <body>
-<div class="container">
+<div class="container" id="main">
     <header id="site-header">
         <div class="row">
             <div class="col-md-4 col-sm-5 col-xs-8">
@@ -292,6 +296,36 @@
 </div>
 
 <script src="js/script.js"></script>
-
+<script>
+    var vue = new Vue({
+        el:"#main",
+        data:{
+            "postsUrl":"/home/index",
+            postsList:[],
+            all: 0, //总页数
+            cur: 1,//当前页码
+        },
+        methods:{
+            getPostsList(){
+                this.$http.get(this.postsUrl).then(response => { 
+                    console.log(response)
+                    if (response.status == 200) {
+                        this.postsList = response.data
+                        this.all = 10
+                    } else {
+                        this.postsList = []
+                        this.all = 0
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
+        },
+        created:function(){
+            this.getPostsList();
+        }
+    })
+</script>
 </body>
 </html>
