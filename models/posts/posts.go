@@ -1,6 +1,9 @@
 package posts
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -52,11 +55,22 @@ func init() {
 	initDB()
 }
 
+//获取帖子列表
 func (this *Posts) GetPosts() (res Result) {
 	o := orm.NewOrm()
 	var maps []orm.Params
 	offset := (page - 1) * pageSize
-	num, err := o.Raw("SELECT * FROM posts limit ?,?", offset, pageSize).Values(&maps)
+	sql := `SELECT p.*, a.email,a.mobile,a.nick_name,a.alias,
+		c.content as cat_content,c.slug as cat_slug 
+		FROM posts AS p 
+		LEFT JOIN admin AS a ON p.admin_id = a.id 
+		LEFT JOIN category AS c ON p.cat_id = c.id 
+		WHERE %s 
+		LIMIT %s;`
+	where := "p.status =1 "
+	limit := strconv.Itoa(offset) + "," + strconv.Itoa(pageSize)
+	sql = fmt.Sprintf(sql, where, limit)
+	num, err := o.Raw(sql).Values(&maps)
 	if err == nil && num > 0 {
 		//info := fmt.Sprintf("num=%v,posts=%v \n", num, maps)
 		res.Code = 0
@@ -65,6 +79,29 @@ func (this *Posts) GetPosts() (res Result) {
 	} else {
 		res.Code = 1
 		res.Message = "获取帖子列表失败:" + err.Error()
+		res.Data = nil
+	}
+	return res
+}
+
+//获取帖子评论数量
+func (this *Posts) GetPostsComment() (res Result) {
+	o := orm.NewOrm()
+	var maps []orm.Params
+	//offset := (page - 1) * pageSize
+	sql := `SELECT posts_id,COUNT(*) as num FROM comments
+		WHERE %s`
+	where := "status =1 GROUP BY  posts_id "
+	sql = fmt.Sprintf(sql, where)
+	num, err := o.Raw(sql).Values(&maps)
+	if err == nil && num > 0 {
+		//info := fmt.Sprintf("num=%v,posts=%v \n", num, maps)
+		res.Code = 0
+		res.Message = "ok"
+		res.Data = maps
+	} else {
+		res.Code = 1
+		res.Message = "获取帖子评论数量失败:" + err.Error()
 		res.Data = nil
 	}
 	return res

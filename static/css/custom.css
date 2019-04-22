@@ -240,11 +240,19 @@ img {
     color: #000;
 }
 
+.entry-content p {
+    overflow:hidden; 
+    text-overflow:ellipsis;
+    display:-webkit-box; 
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2; 
+}
+
 .post-category::after,
-.post-date::after,
 .post-author::after,
+.views-count::after,
 .comments-link::after {
-    content: ' ·';
+    content: ' |';
     color: #000;
 }
 

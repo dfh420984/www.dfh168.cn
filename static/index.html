@@ -73,15 +73,15 @@
                 <article v-for="item in postsList" class="post" v-bind:class="{['post'+item.id]:true}">
                     <header class="entry-header">
                         <h1 class="entry-title">
-                            <a href="single.html">Django 博客开发入门教程：前言</a>
+                            <a href="single.html">{{ item.title }}</a>
                         </h1>
                         <div class="entry-meta">
-                            <span class="post-category"><a href="#">Django 博客教程</a></span>
+                            <span class="post-category"><a href="#">{{ item.cat_content }}</a></span>
+                            <span class="comments-link"><a href="#">{{ item.com_num }} 评论</a></span>
+                            <span class="views-count"><a href="#">{{ item.view_num }} 阅读</a></span>
+                            <span class="post-author"><a href="#">{{ item.nick_name }}</a></span>
                             <span class="post-date"><a href="#"><time class="entry-date"
-                                                                      datetime="2012-11-09T23:15:57+00:00">2017年5月11日</time></a></span>
-                            <span class="post-author"><a href="#">追梦人物</a></span>
-                            <span class="comments-link"><a href="#">4 评论</a></span>
-                            <span class="views-count"><a href="#">588 阅读</a></span>
+                                datetime="2012-11-09T23:15:57+00:00">{{ item.time_update }}</time></a></span>
                         </div>
                     </header>
                     <div class="entry-content clearfix">
