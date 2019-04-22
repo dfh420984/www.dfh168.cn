@@ -26,5 +26,7 @@ func (this *HomeController) Index() {
 	// }
 	// this.ServeJSON()
 	posts := &posts.Posts{}
-	posts.GetPosts()
+	res := posts.GetPosts()
+	this.Data["json"] = &res
+	this.ServeJSON()
 }
