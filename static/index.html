@@ -54,8 +54,8 @@
                     <a id="search-menu" href="#"><span id="search-icon" class="ion-ios-search-strong"></span></a>
                     <div id="search-form" class="search-form">
                         <form role="search" method="get" id="searchform" action="#">
-                            <input type="search" placeholder="搜索" required>
-                            <button type="submit"><span class="ion-ios-search-strong"></span></button>
+                            <input type="search" placeholder="搜索" v-model="keyword" required>
+                            <button type="submit" v-on:click.stop.prevent="searchPosts()"><span class="ion-ios-search-strong"></span></button>
                         </form>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
                 -->
                 <div class="pagination">
                     <ul>
-                        <li><a href="">1</a></li>
+                        <!-- <li><a href="">1</a></li>
                         <li><a href="">...</a></li>
                         <li><a href="">4</a></li>
                         <li><a href="">5</a></li>
@@ -108,7 +108,15 @@
                         <li><a href="">7</a></li>
                         <li><a href="">8</a></li>
                         <li><a href="">...</a></li>
-                        <li><a href="">11</a></li>
+                        <li><a href="">11</a></li> -->
+                        <li v-if="cur==1"><a>首页</a></li>
+                        <li v-if="cur>1"><a v-on:click="cur--,pageClick()">上一页</a></li>
+                        <li v-for="index in indexs"  v-bind:class="{ 'current': cur == index}">
+                            <a v-on:click="btnClick(index)">{{ index }}</a>
+                        </li>
+                        <li v-if="cur!=all"><a v-on:click="cur++,pageClick()">下一页</a></li>
+                        <li v-if="cur == all"><a>尾页</a></li>
+                        <li><a>共<i>{{all}}</i>页</a></li>
                     </ul>
                 </div>
             </main>
@@ -227,21 +235,28 @@
 
 <script src="js/script.js"></script>
 <script>
+    var postsUrl = "/home/index";  //获取帖子列表页
+    var postsTotalUrl = "/home/total"; //获取帖子总数
     var vue = new Vue({
         el:"#main",
         data:{
-            "postsUrl":"/home/index",
+            "postsUrl":postsUrl,
+            "postsTotalUrl":postsTotalUrl,
             postsList:[],
             all: 0, //总页数
             cur: 1,//当前页码
+            cat_id:0,
+            slug:"",
+            keyword:"java",
+            time_create:""
         },
         methods:{
-            getPostsList(){
+            getPostsList(){ 
+                this.postsUrl = this.postsUrl+'?cat_id='+this.cat_id+'&slug='+this.slug+'&keyword='+this.keyword+'&time_create='+this.time_create+'&page='+this.cur
                 this.$http.get(this.postsUrl).then(response => { 
                     console.log(response)
                     if (response.status == 200 && response.data.code == 0) {
                         this.postsList = response.data.data
-                        this.all = 10
                     } else {
                         this.postsList = []
                         this.all = 0
@@ -251,8 +266,65 @@
                     console.log(response)
                 });
             },
+            getPostsTotal(){
+                this.$http.get(this.postsTotalUrl).then(response => { 
+                    console.log(response)
+                    if (response.status == 200 && response.data.code == 0) {
+                        this.all = response.data.data[0]["num"]
+                    } else {
+                        this.all = 0
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
+            btnClick: function(page){//页码点击事件
+                if(page != this.cur){
+                    this.cur = page
+                    this.postsUrl = this.postsUrl+'?page='+this.cur
+                    this.getPostsList()
+                    this.postsUrl = postsUrl
+                }
+            },
+            pageClick: function(){
+                this.postsUrl = this.postsUrl+'?page='+this.cur
+                this.getPostsList()
+                this.postsUrl = postsUrl
+            },
+            searchPosts() {
+                this.getPostsList()
+                this.postsUrl = postsUrl;
+            },
         },
-        created:function(){
+        computed: {
+            indexs: function(){
+                var left = 1;
+                var right = this.all;
+                var ar = [];
+                if(this.all>= 5){
+                    if(this.cur > 3 && this.cur < this.all-2){
+                    left = this.cur - 2
+                    right = this.cur + 2
+                    }else{
+                    if(this.cur<=3){
+                        left = 1
+                        right = 5
+                    }else{
+                        right = this.all
+                        left = this.all -4
+                    }
+                    }
+                }
+                while (left <= right){
+                    ar.push(left)
+                    left ++
+                }
+                    return ar
+            }
+        },
+        created:function(){ 
+            this.getPostsTotal()
             this.getPostsList();
         }
     })
