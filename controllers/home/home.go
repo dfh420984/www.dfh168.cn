@@ -67,9 +67,46 @@ func (this *HomeController) Index() {
 
 //获取帖子数量
 func (this *HomeController) Total() {
-	posts := &posts.Posts{}
+	//获取查询条件
+	search_where := this.search_where()
 	//获取帖子数量
-	res := posts.GetPostsTotal()
+	posts := &posts.Posts{}
+	res := posts.GetPostsTotal(search_where)
+	this.Data["json"] = &res
+	this.ServeJSON()
+}
+
+//获取最新文章
+func (this *HomeController) New() {
+	//获取查询条件
+	search_where := this.search_where()
+	//获取帖子数量
+	posts := &posts.Posts{}
+	res := posts.GetNewPosts(search_where)
+	this.Data["json"] = &res
+	this.ServeJSON()
+}
+
+//获取归档
+func (this *HomeController) Archive() {
+	posts := &posts.Posts{}
+	res := posts.GetArchive()
+	this.Data["json"] = &res
+	this.ServeJSON()
+}
+
+//获取分类
+func (this *HomeController) Category() {
+	posts := &posts.Posts{}
+	res := posts.GetCategory()
+	this.Data["json"] = &res
+	this.ServeJSON()
+}
+
+//获取标签
+func (this *HomeController) Tag() {
+	posts := &posts.Posts{}
+	res := posts.GetTag()
 	this.Data["json"] = &res
 	this.ServeJSON()
 }

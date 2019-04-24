@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -33,37 +32,8 @@ type Result struct {
 	Data    []orm.Params `json:"data"`
 }
 
-//初始化数据库
-func initDB() {
-	//开启调试模式
-	//orm.Debug = true
-	//1.驱动类型
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-	//2.数据库配置
-	dbHost := beego.AppConfig.String("mysqlhost")
-	dbPort := beego.AppConfig.String("mysqport")
-	dbDataBase := beego.AppConfig.String("mysqldb")
-	dbUserName := beego.AppConfig.String("mysqluser")
-	dbPwd := beego.AppConfig.String("mysqlpass")
-	//3.数据库连接
-	conn := dbUserName + ":" + dbPwd + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbDataBase + "?charset=utf8"
-	//4.注册默认数据库
-	orm.RegisterDataBase("default", "mysql", conn, 30, 30)
-}
-
-func init() {
-	initDB()
-}
-
 //获取帖子列表
 func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
-	defer func() {
-		if err := recover(); err != nil {
-			res.Code = 1
-			res.Message = "获取帖子列表失败:"
-			res.Data = nil
-		}
-	}()
 	o := orm.NewOrm()
 	var maps []orm.Params
 	page = search_where["page"].(int)
@@ -81,6 +51,50 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		where += info
 	}
 	if _, ok := search_where["slug"]; ok {
+		info := fmt.Sprintf("AND  p.slug LIKE '%%%s%%' ", search_where["keyword"])
+		where += info
+	}
+	if _, ok := search_where["cat_id"]; ok {
+		info := fmt.Sprintf("AND p.cat_id = %d ", search_where["cat_id"])
+		where += info
+	}
+	if _, ok := search_where["time_create"]; ok {
+		info := fmt.Sprintf("AND p.time_create = %s ", search_where["time_create"])
+		where += info
+	}
+	limit := strconv.Itoa(offset) + "," + strconv.Itoa(pageSize)
+	sql = fmt.Sprintf(sql, where, limit)
+	num, err := o.Raw(sql).Values(&maps)
+	if err == nil && num > 0 {
+		//info := fmt.Sprintf("num=%v,posts=%v \n", num, maps)
+		res.Code = 0
+		res.Message = "ok"
+		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "帖子数量为0"
+		res.Data = nil
+	} else {
+		res.Code = 1
+		res.Message = "获取帖子列表失败:"
+		res.Data = maps
+		fmt.Printf("res=%v\n", res)
+	}
+	this.CatchError(res)
+	return res
+}
+
+//获取最新文章
+func (this *Posts) GetNewPosts(search_where map[string]interface{}) (res Result) {
+	o := orm.NewOrm()
+	var maps []orm.Params
+	sql := `SELECT id,title FROM posts WHERE %s ORDER BY time_create DESC LIMIT 0,10;`
+	where := "status =1 "
+	if _, ok := search_where["keyword"]; ok {
+		info := fmt.Sprintf("AND (content LIKE '%%%s%%' OR title LIKE '%%%s%%' OR slug LIKE '%%%s%%') ", search_where["keyword"], search_where["keyword"], search_where["keyword"])
+		where += info
+	}
+	if _, ok := search_where["slug"]; ok {
 		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["keyword"])
 		where += info
 	}
@@ -88,34 +102,53 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		info := fmt.Sprintf("AND cat_id = %d ", search_where["cat_id"])
 		where += info
 	}
-	limit := strconv.Itoa(offset) + "," + strconv.Itoa(pageSize)
-	sql = fmt.Sprintf(sql, where, limit)
+	if _, ok := search_where["time_create"]; ok {
+		info := fmt.Sprintf("AND time_create = %s ", search_where["time_create"])
+		where += info
+	}
+	sql = fmt.Sprintf(sql, where)
 	num, err := o.Raw(sql).Values(&maps)
-	fmt.Printf("err=%v,num=%v\n", err, num)
 	if err == nil && num > 0 {
-		//info := fmt.Sprintf("num=%v,posts=%v \n", num, maps)
 		res.Code = 0
 		res.Message = "ok"
 		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "最新文章数量为0"
+		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取帖子列表失败:"
-		res.Data = maps
-		fmt.Printf("res=%v\n", res)
+		res.Message = "获取最新文章失败:" + err.Error()
+		res.Data = nil
 	}
+	this.CatchError(res)
 	return res
 }
 
-//获取最新文章
-
 //获取帖子总数
-func (this *Posts) GetPostsTotal() (res Result) {
+func (this *Posts) GetPostsTotal(search_where map[string]interface{}) (res Result) {
 	o := orm.NewOrm()
 	var maps []orm.Params
 	sql := `SELECT count(*) as num
 		FROM posts
 		WHERE %s;`
 	where := "status =1 "
+	if _, ok := search_where["keyword"]; ok {
+		info := fmt.Sprintf("AND (content LIKE '%%%s%%' OR title LIKE '%%%s%%' OR slug LIKE '%%%s%%') ", search_where["keyword"], search_where["keyword"], search_where["keyword"])
+		where += info
+	}
+	if _, ok := search_where["slug"]; ok {
+		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["keyword"])
+		where += info
+	}
+	if _, ok := search_where["cat_id"]; ok {
+		info := fmt.Sprintf("AND cat_id = %d ", search_where["cat_id"])
+		where += info
+	}
+	if _, ok := search_where["time_create"]; ok {
+		info := fmt.Sprintf("AND time_create = %s ", search_where["time_create"])
+		where += info
+	}
 	sql = fmt.Sprintf(sql, where)
 	num, err := o.Raw(sql).Values(&maps)
 	if err == nil && num > 0 {
@@ -136,11 +169,16 @@ func (this *Posts) GetPostsTotal() (res Result) {
 		res.Code = 0
 		res.Message = "ok"
 		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "帖子数量为0"
+		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取帖子列表失败:" + err.Error()
+		res.Message = "获取帖子总数失败:" + err.Error()
 		res.Data = nil
 	}
+	this.CatchError(res)
 	return res
 }
 
@@ -159,10 +197,95 @@ func (this *Posts) GetPostsComment() (res Result) {
 		res.Code = 0
 		res.Message = "ok"
 		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "帖子评论数量为0"
+		res.Data = nil
 	} else {
 		res.Code = 1
 		res.Message = "获取帖子评论数量失败:" + err.Error()
 		res.Data = nil
 	}
+	this.CatchError(res)
 	return res
+}
+
+//获取归档
+func (this *Posts) GetArchive() (res Result) {
+	o := orm.NewOrm()
+	var maps []orm.Params
+	sql := `SELECT DATE_FORMAT(time_create,'%Y%m') as time_create FROM posts GROUP BY time_create`
+	num, err := o.Raw(sql).Values(&maps)
+	if err == nil && num > 0 {
+		res.Code = 0
+		res.Message = "ok"
+		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "最新文章数量为0"
+		res.Data = nil
+	} else {
+		res.Code = 1
+		res.Message = "获取最新文章失败:" + err.Error()
+		res.Data = nil
+	}
+	this.CatchError(res)
+	return res
+}
+
+//获取分类
+func (this *Posts) GetCategory() (res Result) {
+	o := orm.NewOrm()
+	var maps []orm.Params
+	sql := `SELECT c.id AS c_id,c.content AS c_content,COUNT(p.cat_id) AS num FROM category AS c LEFT JOIN posts AS p ON p.cat_id = c.id GROUP BY c_id`
+	num, err := o.Raw(sql).Values(&maps)
+	if err == nil && num > 0 {
+		res.Code = 0
+		res.Message = "ok"
+		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "最新分类数量为0"
+		res.Data = nil
+	} else {
+		res.Code = 1
+		res.Message = "获取分类失败:" + err.Error()
+		res.Data = nil
+	}
+	this.CatchError(res)
+	return res
+}
+
+//获取标签
+func (this *Posts) GetTag() (res Result) {
+	o := orm.NewOrm()
+	var maps []orm.Params
+	sql := `SELECT DISTINCT(slug) as slug FROM posts WHERE status = 1`
+	num, err := o.Raw(sql).Values(&maps)
+	if err == nil && num > 0 {
+		res.Code = 0
+		res.Message = "ok"
+		res.Data = maps
+	} else if err == nil && num == 0 {
+		res.Code = 0
+		res.Message = "最新标签数量为0"
+		res.Data = nil
+	} else {
+		res.Code = 1
+		res.Message = "获取标签失败:" + err.Error()
+		res.Data = nil
+	}
+	this.CatchError(res)
+	return res
+}
+
+//捕获异常
+func (this *Posts) CatchError(res Result) {
+	defer func() {
+		if err := recover(); err != nil {
+			res.Code = 1
+			res.Message = "获取帖子列表失败:" + err.(error).Error()
+			res.Data = nil
+		}
+	}()
 }

@@ -124,28 +124,16 @@
                 <div class="widget widget-recent-posts">
                     <h3 class="widget-title">最新文章</h3>
                     <ul>
-                        <li>
-                            <a href="#">Django 博客开发入门教程：前言</a>
-                        </li>
-                        <li>
-                            <a href="#">Django 博客使用 Markdown 自动生成文章目录</a>
-                        </li>
-                        <li>
-                            <a href="#">部署 Django 博客</a>
+                        <li v-for="item in postsNew">
+                            <a href="#">{{ item.title }}</a>
                         </li>
                     </ul>
                 </div>
                 <div class="widget widget-archives">
                     <h3 class="widget-title">归档</h3>
                     <ul>
-                        <li>
-                            <a href="#">2017 年 5 月</a>
-                        </li>
-                        <li>
-                            <a href="#">2017 年 4 月</a>
-                        </li>
-                        <li>
-                            <a href="#">2017 年 3 月</a>
+                        <li v-for="item in postsArchive">
+                            <a href="#">{{ item.time_create }}</a>
                         </li>
                     </ul>
                 </div>
@@ -153,14 +141,8 @@
                 <div class="widget widget-category">
                     <h3 class="widget-title">分类</h3>
                     <ul>
-                        <li>
-                            <a href="#">Django 博客教程 <span class="post-count">(13)</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Python 教程 <span class="post-count">(11)</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Django 用户认证 <span class="post-count">(8)</span></a>
+                        <li v-for="item in postsCategory">
+                            <a href="#">{{ item.c_content }}<span class="post-count">({{ item.num }})</span></a>
                         </li>
                     </ul>
                 </div>
@@ -168,41 +150,14 @@
                 <div class="widget widget-tag-cloud">
                     <h3 class="widget-title">标签云</h3>
                     <ul>
-                        <li>
-                            <a href="#">Django</a>
-                        </li>
-                        <li>
-                            <a href="#">Python</a>
-                        </li>
-                        <li>
-                            <a href="#">Java</a>
-                        </li>
-                        <li>
-                            <a href="#">笔记</a>
-                        </li>
-                        <li>
-                            <a href="#">文档</a>
-                        </li>
-                        <li>
-                            <a href="#">AngularJS</a>
-                        </li>
-                        <li>
-                            <a href="#">CSS</a>
-                        </li>
-                        <li>
-                            <a href="#">JavaScript</a>
-                        </li>
-                        <li>
-                            <a href="#">Snippet</a>
-                        </li>
-                        <li>
-                            <a href="#">jQuery</a>
+                        <li v-for="item in postsTag">
+                            <a href="#">{{ item.slug }}</a>
                         </li>
                     </ul>
                 </div>
-                <div class="rss">
+                <!-- <div class="rss">
                     <a href=""><span class="ion-social-rss-outline"></span> RSS 订阅</a>
-                </div>
+                </div> -->
             </aside>
         </div>
     </div>
@@ -237,22 +192,33 @@
 <script>
     var postsUrl = "/home/index";  //获取帖子列表页
     var postsTotalUrl = "/home/total"; //获取帖子总数
+    var postsNewUrl = "/home/new";  //获取最新帖子
+    var getArchiveUrl = "/home/archive";  //获取时间归档
+    var getCategoryUrl = "/home/category"; //获取分类
+    var getTagUrl = "/home/tag";  //获取标签
     var vue = new Vue({
         el:"#main",
         data:{
             "postsUrl":postsUrl,
             "postsTotalUrl":postsTotalUrl,
+            "postsNewUrl":postsNewUrl,
+            "getArchiveUrl":getArchiveUrl,
+            "getCategoryUrl":getCategoryUrl,
+            "getTagUrl":getTagUrl,
             postsList:[],
+            postsNew:[],
+            postsArchive:[],
+            postsCategory:[],
+            postsTag:[],
             all: 0, //总页数
             cur: 1,//当前页码
             cat_id:0,
             slug:"",
-            keyword:"java",
+            keyword:"",
             time_create:""
         },
         methods:{
-            getPostsList(){ 
-                this.postsUrl = this.postsUrl+'?cat_id='+this.cat_id+'&slug='+this.slug+'&keyword='+this.keyword+'&time_create='+this.time_create+'&page='+this.cur
+            getPostsList(){  //获取帖子列表
                 this.$http.get(this.postsUrl).then(response => { 
                     console.log(response)
                     if (response.status == 200 && response.data.code == 0) {
@@ -266,7 +232,7 @@
                     console.log(response)
                 });
             },
-            getPostsTotal(){
+            getPostsTotal(){ //获取帖子总数
                 this.$http.get(this.postsTotalUrl).then(response => { 
                     console.log(response)
                     if (response.status == 200 && response.data.code == 0) {
@@ -279,22 +245,73 @@
                     console.log(response)
                 });
             },
+            getNewPosts(){ //获取最新帖子
+                this.$http.get(this.postsNewUrl).then(response => { 
+                    if (response.status == 200 && response.data.code == 0) {
+                        this.postsNew = response.data.data
+                    } else {
+                        this.postsNew = []
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
+            getArchive(){ //获取归档
+                this.$http.get(this.getArchiveUrl).then(response => { 
+                    if (response.status == 200 && response.data.code == 0) {
+                        this.postsArchive = response.data.data
+                    } else {
+                        this.postsArchive = []
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
+            getCategory(){ //获取分类
+                this.$http.get(this.getCategoryUrl).then(response => { 
+                    if (response.status == 200 && response.data.code == 0) {
+                        this.postsCategory = response.data.data
+                    } else {
+                        this.postsCategory = []
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
+            getTag(){ //获取标签
+                this.$http.get(this.getTagUrl).then(response => { 
+                    if (response.status == 200 && response.data.code == 0) {
+                        this.postsTag = response.data.data
+                    } else {
+                        this.postsTag = []
+                    }
+                }, response => {
+                    // error callback
+                    console.log(response)
+                });
+            },
             btnClick: function(page){//页码点击事件
                 if(page != this.cur){
                     this.cur = page
-                    this.postsUrl = this.postsUrl+'?page='+this.cur
-                    this.getPostsList()
-                    this.postsUrl = postsUrl
+                    this.searchPosts()
                 }
             },
             pageClick: function(){
-                this.postsUrl = this.postsUrl+'?page='+this.cur
-                this.getPostsList()
-                this.postsUrl = postsUrl
+                this.searchPosts()
             },
             searchPosts() {
+                this.postsUrl = this.postsUrl+'?cat_id='+this.cat_id+'&slug='+this.slug+'&keyword='+this.keyword+'&time_create='+this.time_create+'&page='+this.cur
+                this.postsTotalUrl = this.postsTotalUrl+'?cat_id='+this.cat_id+'&slug='+this.slug+'&keyword='+this.keyword+'&time_create='+this.time_create
+                this.postsNewUrl = this.postsNewUrl+'?cat_id='+this.cat_id+'&slug='+this.slug+'&keyword='+this.keyword
                 this.getPostsList()
-                this.postsUrl = postsUrl;
+                this.getPostsTotal()
+                this.getNewPosts()
+                this.postsUrl = postsUrl
+                this.postsTotalUrl = postsTotalUrl
+                this.postsNewUrl = postsNewUrl
             },
         },
         computed: {
@@ -325,7 +342,11 @@
         },
         created:function(){ 
             this.getPostsTotal()
-            this.getPostsList();
+            this.getPostsList()
+            this.getNewPosts()
+            this.getArchive()
+            this.getCategory()
+            this.getTag()
         }
     })
 </script>
