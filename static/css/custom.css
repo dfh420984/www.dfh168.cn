@@ -487,7 +487,6 @@ img {
 }
 
 .search-form {
-    display: none;
     width: 25%;
     position: absolute;
     min-width: 200px;
@@ -505,7 +504,7 @@ img {
     min-height: 42px;
 }
 
-#searchform input[type=search] {
+#searchform input[type=text] {
     width: 100%;
     border: none;
     position: absolute;
@@ -912,3 +911,11 @@ img {
 .current a {
     color: red;
 }
+
+li .current  {
+    color: red;
+}
+
+[v-cloak] {
+    display: none;
+  }

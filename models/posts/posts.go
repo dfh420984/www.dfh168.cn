@@ -51,7 +51,7 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		where += info
 	}
 	if _, ok := search_where["slug"]; ok {
-		info := fmt.Sprintf("AND  p.slug LIKE '%%%s%%' ", search_where["keyword"])
+		info := fmt.Sprintf("AND  p.slug LIKE '%%%s%%' ", search_where["slug"])
 		where += info
 	}
 	if _, ok := search_where["cat_id"]; ok {
@@ -59,7 +59,7 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		where += info
 	}
 	if _, ok := search_where["time_create"]; ok {
-		info := fmt.Sprintf("AND p.time_create = %s ", search_where["time_create"])
+		info := fmt.Sprintf("AND DATE_FORMAT(p.time_create,'%%Y%%m') = %s ", search_where["time_create"])
 		where += info
 	}
 	limit := strconv.Itoa(offset) + "," + strconv.Itoa(pageSize)
@@ -95,7 +95,7 @@ func (this *Posts) GetNewPosts(search_where map[string]interface{}) (res Result)
 		where += info
 	}
 	if _, ok := search_where["slug"]; ok {
-		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["keyword"])
+		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["slug"])
 		where += info
 	}
 	if _, ok := search_where["cat_id"]; ok {
@@ -103,7 +103,7 @@ func (this *Posts) GetNewPosts(search_where map[string]interface{}) (res Result)
 		where += info
 	}
 	if _, ok := search_where["time_create"]; ok {
-		info := fmt.Sprintf("AND time_create = %s ", search_where["time_create"])
+		info := fmt.Sprintf("AND DATE_FORMAT(time_create,'%%Y%%m') = %s ", search_where["time_create"])
 		where += info
 	}
 	sql = fmt.Sprintf(sql, where)
@@ -138,7 +138,7 @@ func (this *Posts) GetPostsTotal(search_where map[string]interface{}) (res Resul
 		where += info
 	}
 	if _, ok := search_where["slug"]; ok {
-		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["keyword"])
+		info := fmt.Sprintf("AND  slug LIKE '%%%s%%' ", search_where["slug"])
 		where += info
 	}
 	if _, ok := search_where["cat_id"]; ok {
@@ -146,7 +146,7 @@ func (this *Posts) GetPostsTotal(search_where map[string]interface{}) (res Resul
 		where += info
 	}
 	if _, ok := search_where["time_create"]; ok {
-		info := fmt.Sprintf("AND time_create = %s ", search_where["time_create"])
+		info := fmt.Sprintf("AND DATE_FORMAT(time_create,'%%Y%%m') = %s ", search_where["time_create"])
 		where += info
 	}
 	sql = fmt.Sprintf(sql, where)
