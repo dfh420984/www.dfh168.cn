@@ -20,6 +20,10 @@ func (this *HomeController) search_where() map[string]interface{} {
 	search_where := make(map[string]interface{})
 	page, _ := this.GetInt("page", 1)
 	search_where["page"] = page
+	id, _ := this.GetInt("id", 0)
+	if id > 0 {
+		search_where["id"] = id
+	}
 	cat_id, _ := this.GetInt("cat_id", 0)
 	if cat_id > 0 {
 		search_where["cat_id"] = cat_id

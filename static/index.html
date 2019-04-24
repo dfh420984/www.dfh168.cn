@@ -73,7 +73,7 @@
                 <article v-for="item in postsList" class="post" v-bind:class="{['post'+item.id]:true}">
                     <header class="entry-header">
                         <h1 class="entry-title">
-                            <a href="single.html">{{ item.title }}</a>
+                            <a :href="'single.html?id='+item.id" target="_blank">{{ item.title }}</a>
                         </h1>
                         <div class="entry-meta">
                             <span class="post-category"><a href="#">{{ item.cat_content }}</a></span>
@@ -87,7 +87,7 @@
                     <div class="entry-content clearfix">
                         <p>{{ item.content }}</p>
                         <div class="read-more cl-effect-14">
-                            <a href="#" class="more-link">继续阅读 <span class="meta-nav">→</span></a>
+                            <a :href="'single.html?id='+item.id" target="_blank" class="more-link">继续阅读 <span class="meta-nav">→</span></a>
                         </div>
                     </div>
                 </article>
@@ -125,7 +125,7 @@
                     <h3 class="widget-title">最新文章</h3>
                     <ul>
                         <li v-for="item in postsNew">
-                            <a href="#">{{ item.title }}</a>
+                            <a :href="'single.html?id='+item.id" target="_blank">{{ item.title }}</a>
                         </li>
                     </ul>
                 </div>
@@ -187,7 +187,12 @@
 </div>
 
 <script src="js/script.js"></script>
+<script src="js/common.js"></script>
 <script>
+    var time_create = getQueryVariable("time_create")
+    var cat_id = getQueryVariable("cat_id") 
+    var slug = getQueryVariable("slug") 
+    var keyword = getQueryVariable("keyword") 
     var postsUrl = "/home/index";  //获取帖子列表页
     var postsTotalUrl = "/home/total"; //获取帖子总数
     var postsNewUrl = "/home/new";  //获取最新帖子
@@ -210,10 +215,10 @@
             postsTag:[],
             all: 0, //总页数
             cur: 1,//当前页码
-            cat_id:0,
-            slug:"",
-            keyword:"",
-            time_create:""
+            cat_id:cat_id ? parseInt(cat_id) : 0,
+            slug:slug ? slug : "",
+            keyword:keyword ? keyword : "",
+            time_create:time_create ? time_create : ""
         },
         methods:{
             getPostsList(){  //获取帖子列表
@@ -349,9 +354,7 @@
             }
         },
         created:function(){ 
-            this.getPostsTotal()
-            this.getPostsList()
-            this.getNewPosts()
+            this.searchPosts()
             this.getArchive()
             this.getCategory()
             this.getTag()

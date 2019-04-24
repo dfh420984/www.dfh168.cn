@@ -10,7 +10,7 @@ import (
 
 var (
 	page     int = 1
-	pageSize int = 1
+	pageSize int = 20
 )
 
 type Posts struct {
@@ -46,6 +46,10 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		WHERE %s 
 		ORDER BY p.view_num desc LIMIT %s;`
 	where := "p.status =1 "
+	if _, ok := search_where["id"]; ok {
+		info := fmt.Sprintf("AND p.id = %d ", search_where["id"])
+		where += info
+	}
 	if _, ok := search_where["keyword"]; ok {
 		info := fmt.Sprintf("AND (p.content LIKE '%%%s%%' OR p.title LIKE '%%%s%%' OR p.slug LIKE '%%%s%%') ", search_where["keyword"], search_where["keyword"], search_where["keyword"])
 		where += info
