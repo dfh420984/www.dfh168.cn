@@ -218,7 +218,7 @@ func (this *Posts) GetPostsComment() (res Result) {
 func (this *Posts) GetArchive() (res Result) {
 	o := orm.NewOrm()
 	var maps []orm.Params
-	sql := `SELECT DATE_FORMAT(time_create,'%Y%m') as time_create FROM posts GROUP BY time_create`
+	sql := `SELECT DISTINCT(DATE_FORMAT(time_create,'%Y%m')) as time_create FROM posts GROUP BY time_create`
 	num, err := o.Raw(sql).Values(&maps)
 	if err == nil && num > 0 {
 		res.Code = 0
