@@ -10,7 +10,7 @@ import (
 //初始化数据库
 func initDB() {
 	//开启调试模式
-	orm.Debug = true
+	//orm.Debug = true
 	//1.驱动类型
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	//2.数据库配置
