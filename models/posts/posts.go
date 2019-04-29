@@ -46,7 +46,8 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		WHERE %s 
 		ORDER BY p.view_num desc LIMIT %s;`
 	where := "p.status =1 "
-	if _, ok := search_where["id"]; ok {
+	if _, ok := search_where["id"]; ok { //如果是详情页，帖子浏览量需增加
+		this.ViewCount(search_where)
 		info := fmt.Sprintf("AND p.id = %d ", search_where["id"])
 		where += info
 	}
@@ -82,7 +83,6 @@ func (this *Posts) GetPosts(search_where map[string]interface{}) (res Result) {
 		res.Code = 1
 		res.Message = "获取帖子列表失败:"
 		res.Data = maps
-		fmt.Printf("res=%v\n", res)
 	}
 	this.CatchError(res)
 	return res
@@ -122,7 +122,7 @@ func (this *Posts) GetNewPosts(search_where map[string]interface{}) (res Result)
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取最新文章失败:" + err.Error()
+		res.Message = "获取最新文章失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)
@@ -179,7 +179,7 @@ func (this *Posts) GetPostsTotal(search_where map[string]interface{}) (res Resul
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取帖子总数失败:" + err.Error()
+		res.Message = "获取帖子总数失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)
@@ -207,7 +207,7 @@ func (this *Posts) GetPostsComment() (res Result) {
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取帖子评论数量失败:" + err.Error()
+		res.Message = "获取帖子评论数量失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)
@@ -230,7 +230,7 @@ func (this *Posts) GetArchive() (res Result) {
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取最新文章失败:" + err.Error()
+		res.Message = "获取最新文章失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)
@@ -253,7 +253,7 @@ func (this *Posts) GetCategory() (res Result) {
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取分类失败:" + err.Error()
+		res.Message = "获取分类失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)
@@ -276,7 +276,32 @@ func (this *Posts) GetTag() (res Result) {
 		res.Data = nil
 	} else {
 		res.Code = 1
-		res.Message = "获取标签失败:" + err.Error()
+		res.Message = "获取标签失败:"
+		res.Data = nil
+	}
+	this.CatchError(res)
+	return res
+}
+
+//增加帖子浏览量
+func (this *Posts) ViewCount(search_where map[string]interface{}) (res Result) {
+	o := orm.NewOrm()
+	sql := `UPDATE posts SET view_num = view_num + 1 WHERE id = ?`
+	data, err := o.Raw(sql, search_where["id"]).Exec()
+	if err == nil {
+		num, _ := data.RowsAffected()
+		if num > 0 {
+			res.Code = 0
+			res.Message = "帖子浏览量更新成功:"
+			res.Data = nil
+		} else {
+			res.Code = 0
+			res.Message = "帖子浏览量更新失败"
+			res.Data = nil
+		}
+	} else {
+		res.Code = 1
+		res.Message = "帖子浏览量更新失败:"
 		res.Data = nil
 	}
 	this.CatchError(res)

@@ -150,7 +150,7 @@
                         <h3 class="widget-title">最新文章</h3>
                         <ul>
                             <li v-for="item in postsNew">
-                                <a :href="'single.html?id='+item.id" target="_blank">{{ item.title }}</a>
+                                <a :href="'single.html?id='+item.id">{{ item.title }}</a>
                             </li>
                         </ul>
                     </div>
@@ -158,7 +158,7 @@
                         <h3 class="widget-title">归档</h3>
                         <ul>
                             <li v-for="item in postsArchive">
-                                <a :href="'index.html?time_create='+item.time_create" target="_blank">{{ item.time_create }}</a>
+                                <a :href="'index.html?time_create='+item.time_create">{{ item.time_create }}</a>
                             </li>
                         </ul>
                     </div>
@@ -167,7 +167,7 @@
                         <h3 class="widget-title">分类</h3>
                         <ul>
                             <li v-for="item in postsCategory">
-                                <a :href="'index.html?cat_id='+item.c_id" target="_blank">{{ item.c_content }}<span class="post-count">({{ item.num }})</span></a>
+                                <a :href="'index.html?cat_id='+item.c_id">{{ item.c_content }}<span class="post-count">({{ item.num }})</span></a>
                             </li>
                         </ul>
                     </div>
@@ -176,7 +176,7 @@
                         <h3 class="widget-title">标签云</h3>
                         <ul>
                             <li v-for="item in postsTag">
-                                <a :href="'index.html?slug='+item.slug" target="_blank">{{ item.slug }}</a>
+                                <a :href="'index.html?slug='+item.slug">{{ item.slug }}</a>
                             </li>
                         </ul>
                     </div>
@@ -191,7 +191,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <p class="copyright">&copy <script>var date = new Date();var year = date.getFullYear();document.write(year)</script> - <a href="//www.dfh168.cn/" title="博客" target="_blank">RichyDuan的博客</a>
+                <p class="copyright">&copy <script>var date = new Date();var year = date.getFullYear();document.write(year)</script> - <a href="//www.dfh168.cn/" title="博客">RichyDuan的博客</a>
                 </p>
             </div>
         </div>
