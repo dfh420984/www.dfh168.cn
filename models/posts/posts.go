@@ -264,7 +264,7 @@ func (this *Posts) GetCategory() (res Result) {
 func (this *Posts) GetTag() (res Result) {
 	o := orm.NewOrm()
 	var maps []orm.Params
-	sql := `SELECT DISTINCT(slug) as slug FROM posts WHERE status = 1`
+	sql := `SELECT DISTINCT(slug) as slug FROM posts WHERE status = 1 and slug != ""`
 	num, err := o.Raw(sql).Values(&maps)
 	if err == nil && num > 0 {
 		res.Code = 0
