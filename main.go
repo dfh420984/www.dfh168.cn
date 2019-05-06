@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blog/models/posts"
 	_ "blog/routers"
 
 	"github.com/astaxie/beego"
@@ -23,6 +24,7 @@ func initDB() {
 	conn := dbUserName + ":" + dbPwd + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbDataBase + "?charset=utf8"
 	//4.注册默认数据库
 	orm.RegisterDataBase("default", "mysql", conn, 30, 30)
+	orm.RegisterModel(new(posts.Posts))
 }
 
 func init() {

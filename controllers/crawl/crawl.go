@@ -6,8 +6,9 @@ import (
 	_ "strconv"
 	"time"
 
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+
+	"github.com/astaxie/beego"
 )
 
 type CrawlController struct {
@@ -15,7 +16,7 @@ type CrawlController struct {
 }
 
 var (
-	crawl_url  string = "https://www.cnblogs.com/dfh168/p/10721847.html"
+	crawl_url  string = "https://www.cnblogs.com/dfh168/p/10720787.html"
 	postsInfo  posts.Posts
 	crawlModel *crawl.CrawlModel
 )
@@ -24,6 +25,7 @@ func (this *CrawlController) Crawl() {
 	//1.链接redis
 	this.ConnectRedis()
 	crawl.PutinQueue(crawl_url)
+	this.Ctx.WriteString("<br>" + "start of crawl" + "</br>")
 	for {
 		length := crawl.GetQueueLength()
 		if length == 0 {
@@ -44,9 +46,10 @@ func (this *CrawlController) Crawl() {
 		if postsInfo.Title != "" {
 			postsInfo.Content = crawlModel.GetContent(str, `<div.*class="blogpost-body">([\s|\S]+?)</div>`)
 			//插入文章
+			crawlModel.AddPosts(&postsInfo)
 		}
 		//	提取该页面的索引连接
-		urls := crawlModel.GetUrls(str, `<a.*?href="(https://www.cnblogs.com/.*?/p/.*?)">`)
+		urls := crawlModel.GetUrls(str, `<a.*?href="(https://www.cnblogs.com/.+?)".*>.+</a>`)
 
 		for _, url := range urls {
 			crawl.PutinQueue(url)
@@ -56,8 +59,8 @@ func (this *CrawlController) Crawl() {
 		crawl.AddToSet(crawl_url)
 
 		time.Sleep(time.Second * 2)
-		this.Ctx.WriteString("end of crawl")
 	}
+	this.Ctx.WriteString("<br>" + "end of crawl" + "</br>")
 }
 
 //链接redis
