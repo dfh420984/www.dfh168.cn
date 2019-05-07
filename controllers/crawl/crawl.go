@@ -44,7 +44,11 @@ func (this *CrawlController) Crawl() {
 		//提取文章相关信息
 		postsInfo.Title = crawlModel.GetContent(str, `<a\s*.*\s*class="postTitle2"\s*.*>(.*)</a>`)
 		if postsInfo.Title != "" {
+			postsInfo.Id = 0
 			postsInfo.Content = crawlModel.GetContent(str, `<div.*class="blogpost-body">([\s|\S]+?)</div>`)
+			timeStr := time.Now().Format("2006-01-02 15:04:05")
+			postsInfo.Time_create = timeStr
+			postsInfo.Time_update = timeStr
 			//插入文章
 			crawlModel.AddPosts(&postsInfo)
 		}
